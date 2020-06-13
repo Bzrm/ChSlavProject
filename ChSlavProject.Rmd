@@ -1,0 +1,104 @@
+---
+title: "ChSlav"
+output: html_document
+---
+
+Download the dataframe
+
+```{r}
+slavdf <- read.csv('https://raw.githubusercontent.com/Bzrm/ChSlavProject/master/ChSlavDF.csv', encoding = 'UTF8', header = TRUE)
+```
+
+Delete objects from hybrid th.domain
+
+```{r}
+slavdf <- slavdf[!(slavdf$th.domain=="hybrid"),]
+```
+
+```{r}
+summary(slavdf)
+```
+
+Converting variables to factors and numerical
+
+```{r}
+slavdf[, 1] <- as.numeric(as.character(slavdf[ ,1]))
+
+slavdf[, 2] <- as.factor(slavdf[ ,2])
+
+targ <- as.factor(slavdf[ ,3])
+
+#print(levels(targ))
+
+levels(targ)[levels(targ)=='church'] <- 1
+
+levels(targ)[levels(targ)=='non-church'] <- 0
+
+slavdf[, 3] <- as.numeric(as.character(targ))
+
+slavdf[, 4] <- as.numeric(as.character(slavdf[ ,4]))
+```
+
+
+```{r}
+summary(slavdf)
+plot(slavdf)
+```
+
+
+Probit models
+
+```{r}
+
+model_century <- glm(targ.word ~ century, family = binomial(link = "probit"), data = slavdf)
+
+model_century_th.domain <- glm(targ.word ~ century + th.domain, family = binomial(link = "probit"), data = slavdf)
+
+model_all_var <- glm(targ.word ~ century + th.domain + oth.words,family = binomial(link = "probit"), data = slavdf)
+
+
+model_oth.words <- glm(targ.word ~ oth.words,family = binomial(link = "probit"), data = slavdf)
+
+model_oth.words_century <- glm(targ.word ~  oth.words + century,family = binomial(link = "probit"), data = slavdf)
+
+model_oth.words_th.domain <- glm(targ.word ~  oth.words + th.domain,family = binomial(link = "probit"), data = slavdf)
+
+
+model_th.domain <- glm(targ.word ~ th.domain,family = binomial(link = "probit"), data = slavdf)
+
+```
+
+
+
+```{r}
+summary(model_all_var)
+```
+oth.words and business th.domain are significant.
+
+
+```{r}
+summary(model_century_th.domain)
+```
+century and business th.domain are significant.
+
+```{r}
+summary(model_oth.words_century)
+```
+oth.words is significant.
+
+```{r}
+summary(model_oth.words_th.domain)
+```
+oth.words and business th.domain are significant.
+
+```{r}
+summary(model_century)
+```
+
+```{r}
+summary(model_th.domain)
+```
+
+```{r}
+summary(model_oth.words)
+```
